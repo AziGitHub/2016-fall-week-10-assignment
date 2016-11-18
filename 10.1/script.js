@@ -11,14 +11,39 @@ var plot = d3.select('.canvas')
     .append('g').attr('class','plot')
     .attr('transform','translate('+ m.l+','+ m.t+')');
 
-//Mapping specific functions
-//Projection
+var projection = d3.geoMercator()
+    .scale(100)
+    .translate([w / 2, h / 2]);
 
-//Geopath
+    var path = d3.geoPath()
+    .projection(projection);
 
-d3.json('../data/world-50m.json',dataloaded);
+    d3.json('../data/world-50m.json',dataloaded);
 
-function dataloaded(err, data){
-    console.log(data); //This is a Topojson data
-    console.log(topojson.feature(data,data.objects.countries)); //This is the converted GeoJSON data of countries
+    color = d3.scaleLinear().domain([1,1000])
+    .interpolate(d3.interpolateHcl)
+    .range([d3.rgb("#00264d"), d3.rgb('#ffffff')]);
+
+
+
+function dataloaded(err, data) {
+    var countries = topojson.feature(data, data.objects.countries).features;
+
+
+    plot
+    .selectAll(".country")
+        .data(countries)
+        .enter()
+        .insert("path", ".graticule")
+        .attr("class", "country")
+        .attr("d", path)
+        .style("fill",function(d){
+
+        //  console.log(d.id);
+        return color(d.id)
+
+        });
 }
+
+
+
